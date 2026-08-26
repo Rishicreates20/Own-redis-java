@@ -1,0 +1,8 @@
+{
+  "name": "Redis Web CLI",
+  "description": "A frontend terminal for a custom Java Redis backend.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
