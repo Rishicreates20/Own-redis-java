@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Java server
+server/target/
+*.ordb
+*.ordb.tmp-*

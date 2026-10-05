@@ -1,0 +1,32 @@
+# Own-Redis-Java sample configuration.
+#   java -jar target/own-redis-java.jar --config redis.conf
+# Command-line flags always override what is set here.
+
+# Bind address and the RESP port real Redis clients connect to.
+bind 0.0.0.0
+port 6379
+
+# The REST bridge the React Web CLI posts to. Set http no to switch it off.
+http yes
+http-port 8080
+# Tighten this to the dev server's origin once you stop testing from file:// or curl.
+cors-origin *
+
+# Number of SELECTable databases.
+databases 16
+
+# Uncomment to require AUTH before any command.
+# requirepass change-me
+
+# Snapshot location and behaviour.
+dir .
+dbfilename dump.ordb
+load-snapshot yes
+save-on-shutdown yes
+
+# How often the active expiry cycle samples keys, in milliseconds.
+expiry-interval 100
+
+# inline  = run commands on the Netty event loop (lowest latency; the default)
+# vthread = run them on virtual threads, serialised per connection
+exec-model inline
