@@ -2,6 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Terminal as TerminalIcon, Settings, Info, Server, Play, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 import { CommandEntry } from './types';
 
+// One id per tab, so SELECT, MULTI/EXEC and SUBSCRIBE keep their state on the server
+// across the separate HTTP requests this terminal makes.
+const SESSION_ID = `web-${Math.random().toString(36).substring(2, 10)}`;
+
 export default function App() {
   const [endpoint, setEndpoint] = useState('http://localhost:8080/api/command');
   const [command, setCommand] = useState('');
@@ -63,7 +67,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ command: cmd }),
+        body: JSON.stringify({ command: cmd, sessionId: SESSION_ID }),
       });
 
       if (!response.ok) {
@@ -71,12 +75,12 @@ export default function App() {
       }
 
       const data = await response.json();
-      
-      // Assume the backend returns a JSON object like { "result": "OK" } or { "result": "..." }
-      // Adjust this based on how you actually build your Java backend
+
+      // The Java backend answers { "result": "...", "error": true|false }; a Redis-level
+      // error is a normal 200 response, so the flag is what decides how it renders.
       const resultText = data.result !== undefined ? String(data.result) : JSON.stringify(data);
-      addHistory('output', resultText);
-      
+      addHistory(data.error ? 'error' : 'output', resultText);
+
     } catch (err: any) {
       addHistory('error', `Failed to connect to backend: ${err.message}\nMake sure your Java server is running and CORS is enabled.`);
     } finally {
@@ -140,7 +144,8 @@ export default function App() {
                 <div className="text-xs font-semibold text-zinc-500 mb-1">REQUEST (POST)</div>
                 <pre className="text-[11px] bg-zinc-900 p-2 rounded text-zinc-300 font-mono overflow-x-auto">
 {`{
-  "command": "SET mykey Hello"
+  "command": "SET mykey Hello",
+  "sessionId": "web-a1b2c3d4"
 }`}
                 </pre>
               </div>
@@ -149,7 +154,8 @@ export default function App() {
                 <div className="text-xs font-semibold text-zinc-500 mb-1">EXPECTED RESPONSE</div>
                 <pre className="text-[11px] bg-zinc-900 p-2 rounded text-emerald-400 font-mono overflow-x-auto">
 {`{
-  "result": "OK"
+  "result": "OK",
+  "error": false
 }`}
                 </pre>
               </div>
